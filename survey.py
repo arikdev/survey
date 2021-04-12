@@ -1,4 +1,5 @@
 import pandas as pd
+import json
 import sys
 
 survey_file = '/home/manage/arik/survey/FCE_Quiz.xlsx'
@@ -6,14 +7,20 @@ res_part1_file = '/home/manage/arik/survey/CyberSecuritySurveyPart1.xlsx'
 res_part2_file = '/home/manage/arik/survey/CyberSecuritySurveyPart2.xlsx'
 tmp_csv_file = "tmp_file.csv"
 
+SEP = '^'
+
 questions = []
 results = {}
+
+def cacl_grade(answers):
+    print('')
 
 def excel_to_csv(excel_file):
     tmp_csv_file = "tmp_file.csv"
     read_file = pd.read_excel(excel_file)
     read_file.to_csv (tmp_csv_file,
                     index = None,
+                    sep = SEP, 
                     header=True)
     return tmp_csv_file
 
@@ -22,7 +29,7 @@ def handle_res_file(res_file, question_start, num_of_questions, is_part1):
         jump = True
         for line in fin:
             line = line[:-1]
-            tokens = line.split(',')
+            tokens = line.split(SEP)
             email = tokens[3]
             if '@' in email:
                 jump = False
@@ -49,7 +56,7 @@ def load_db():
                 count += 1
                 continue
             line = line[:-1]
-            tokens = line.split(',')
+            tokens = line.split(SEP)
             if tokens[0] == 'Training':
                 break
             if len(tokens[0]) > 0:
@@ -57,7 +64,7 @@ def load_db():
             if len(tokens[1]) > 0:
                 sub_category = tokens[1]
             question = tokens[3]
-            weight = tokens[4]
+            weight = float(tokens[4])
             answer = tokens[-1]
             questions.append({'category':category, 'sub_category':sub_category, 'question':question, 'weight':weight, 'answer':answer})
 
@@ -79,3 +86,8 @@ for k,v in results.items():
     for i in v['answers']:
         sum += i
     print(k, sum)
+
+with open('questions.json', 'w') as fout:
+    json.dump(questions, fout)
+with open('results.json', 'w') as fout:
+    json.dump(results, fout)
