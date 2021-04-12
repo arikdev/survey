@@ -6,14 +6,27 @@ survey_file = '/home/manage/arik/survey/FCE_Quiz.xlsx'
 res_part1_file = '/home/manage/arik/survey/CyberSecuritySurveyPart1.xlsx'
 res_part2_file = '/home/manage/arik/survey/CyberSecuritySurveyPart2.xlsx'
 tmp_csv_file = "tmp_file.csv"
-
 SEP = '^'
-
 questions = []
 results = {}
 
 def cacl_grade(answers):
-    print('')
+    grades = [0 for i in answers]
+    category_graes = {}
+
+    for i,answer in enumerate(answers):
+        if answer == 5:
+            continue
+        correct = questions[i]['answer']
+        if correct < 5:
+            if answer > 5:
+                continue
+        else:
+            if answer < 5:
+                continue
+        grades[i] = 5 - abs(correct - answer)
+
+    return grades
 
 def excel_to_csv(excel_file):
     tmp_csv_file = "tmp_file.csv"
@@ -65,7 +78,7 @@ def load_db():
                 sub_category = tokens[1]
             question = tokens[3]
             weight = float(tokens[4])
-            answer = tokens[-1]
+            answer = int(tokens[-1])
             questions.append({'category':category, 'sub_category':sub_category, 'question':question, 'weight':weight, 'answer':answer})
 
     handle_res_file(res_part1_file, 9, 25, True)
@@ -79,13 +92,13 @@ for i,v in enumerate(questions):
     print('------------------------------------------------------------')
     print(i)
     print(v)
+
 print('------------- Results -----------------')
 for k,v in results.items():
-    print(k, v)
-    sum = 0
-    for i in v['answers']:
-        sum += i
-    print(k, sum)
+    print(k)
+    print(v)
+    grades = cacl_grade(v['answers'])
+    print(grades)
 
 with open('questions.json', 'w') as fout:
     json.dump(questions, fout)
