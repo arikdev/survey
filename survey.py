@@ -3,6 +3,7 @@ import sys
 
 survey_file = '/home/manage/arik/survey/FCE_Quiz.xlsx'
 res_part1_file = '/home/manage/arik/survey/CyberSecuritySurveyPart1.xlsx'
+res_part2_file = '/home/manage/arik/survey/CyberSecuritySurveyPart2.xlsx'
 tmp_csv_file = "tmp_file.csv"
 
 questions = []
@@ -32,8 +33,11 @@ def handle_res_file(res_file, question_start, num_of_questions, is_part1):
                 results[email] = {'answers': answers}
             answers = results[email]['answers']
             q_pos = 0 if is_part1 else len(answers)
+            if not is_part1:
+                part2 = [-1 for i in range(num_of_questions)]
+                answers += part2
             for i in range(question_start, question_start + num_of_questions):
-                answers[q_pos] = tokens[i]
+                answers[q_pos] = int(tokens[i])
                 q_pos += 1
 
 
@@ -58,6 +62,7 @@ def load_db():
             questions.append({'category':category, 'sub_category':sub_category, 'question':question, 'weight':weight, 'answer':answer})
 
     handle_res_file(res_part1_file, 9, 25, True)
+    handle_res_file(res_part2_file, 6, 33, False)
     
 load_db()
 
@@ -70,3 +75,7 @@ for i,v in enumerate(questions):
 print('------------- Results -----------------')
 for k,v in results.items():
     print(k, v)
+    sum = 0
+    for i in v['answers']:
+        sum += i
+    print(k, sum)
