@@ -2,6 +2,7 @@ import pandas as pd
 import json
 import sys
 
+DEBUG = False
 survey_file = '/home/manage/arik/survey/FCE_Quiz.xlsx'
 res_part1_file = '/home/manage/arik/survey/CyberSecuritySurveyPart1.xlsx'
 res_part2_file = '/home/manage/arik/survey/CyberSecuritySurveyPart2.xlsx'
@@ -9,6 +10,13 @@ tmp_csv_file = "tmp_file.csv"
 SEP = '^'
 questions = []
 results = {}
+
+def summerize_grades(result):
+    result['categories'] = {}
+    for q in questions:
+        if q['category'] not in result['categories']:
+            result['categories'][q['category']] = {'questions':{}}
+
 
 def cacl_grade(answers):
     grades = [0 for i in answers]
@@ -86,19 +94,16 @@ def load_db():
     
 load_db()
 
-
-print('------------- Questions -----------------')
-for i,v in enumerate(questions):
-    print('------------------------------------------------------------')
-    print(i)
-    print(v)
-
-print('------------- Results -----------------')
+if DEBUG:
+    print('------------- Questions -----------------')
+    for i,v in enumerate(questions):
+        print('------------------------------------------------------------')
+        print(i)
+        print(v)
+    
 for k,v in results.items():
-    print(k)
-    print(v)
-    grades = cacl_grade(v['answers'])
-    print(grades)
+    v['grades'] = cacl_grade(v['answers'])
+    summerize_grades(v)
 
 with open('questions.json', 'w') as fout:
     json.dump(questions, fout)
