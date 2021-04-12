@@ -13,9 +13,10 @@ results = {}
 
 def summerize_grades(result):
     result['categories'] = {}
-    for q in questions:
+    for i,q in enumerate(questions):
         if q['category'] not in result['categories']:
             result['categories'][q['category']] = {'questions':{}}
+        result['categories'][q['category']]['questions'][str(i)] = {}
 
 
 def cacl_grade(answers):
