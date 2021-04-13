@@ -11,12 +11,32 @@ SEP = '^'
 questions = []
 results = {}
 
+def get_grade(category, grades):
+    grade = 0.0
+    max_grade = 0.0
+
+    for i,q in enumerate(questions):
+        if q['category'] != category:
+            continue
+        grade += grades[i] * questions[i]['weight']
+        max_grade += 5 * questions[i]['weight']
+
+    return grade / max_grade
+
+
 def summerize_grades(result):
     result['categories'] = {}
+    old_category = None
     for i,q in enumerate(questions):
+        if i >= len(result['grades']):
+                break
         if q['category'] not in result['categories']:
-            result['categories'][q['category']] = {'questions':{}}
-        result['categories'][q['category']]['questions'][str(i)] = {}
+            if old_category is not None:
+                result['categories'][old_category]['grade'] = get_grade(old_category, result['grades'])
+            result['categories'][q['category']] = {}
+            old_category = q['category']
+    if old_category is not None:
+        result['categories'][old_category]['grade'] = get_grade(old_category, result['grades'])
 
 
 def cacl_grade(answers):
