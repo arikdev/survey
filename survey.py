@@ -24,11 +24,12 @@ def get_grade(category, grades):
     return grade / max_grade
 
 
-def summerize_grades(result):
+def summerize_grades(mail, result):
     result['categories'] = {}
     old_category = None
     for i,q in enumerate(questions):
         if i >= len(result['grades']):
+                print(mail + ' did not finish 2 parts! ')
                 break
         if q['category'] not in result['categories']:
             if old_category is not None:
@@ -44,6 +45,8 @@ def cacl_grade(answers):
     category_graes = {}
 
     for i,answer in enumerate(answers):
+        if answer == -1:
+            return -1
         if answer == 5:
             continue
         correct = questions[i]['answer']
@@ -77,9 +80,13 @@ def handle_res_file(res_file, question_start, num_of_questions, is_part1):
                 jump = False
             if jump:
                 continue
+            if is_part1:
+                group = tokens[6]
+            else:
+                group = 'None'
             if email not in results:
                 answers = [-1 for i in range(num_of_questions)]
-                results[email] = {'answers': answers}
+                results[email] = {'answers': answers, 'group':group}
             answers = results[email]['answers']
             q_pos = 0 if is_part1 else len(answers)
             if not is_part1:
@@ -123,8 +130,12 @@ if DEBUG:
         print(v)
     
 for k,v in results.items():
-    v['grades'] = cacl_grade(v['answers'])
-    summerize_grades(v)
+    grade = cacl_grade(v['answers'])
+    if grade == -1:
+        print(k + ' did not finish 2 parts! ')
+        continue
+    v['grades'] = grade
+    summerize_grades(k, v)
 
 with open('questions.json', 'w') as fout:
     json.dump(questions, fout)
